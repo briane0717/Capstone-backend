@@ -1,8 +1,12 @@
-import product from "../models/product.mjs";
+import Product from "../models/product.mjs";
 
-async function seed(req, res) {
+const seed = async (req, res) => {
   try {
-    await product.create([
+    // You can clear the existing data if you want to reset the products every time you seed
+    // await Product.deleteMany({});
+
+    // Seed new products
+    await Product.create([
       {
         name: "Product 1",
         price: 10,
@@ -36,15 +40,29 @@ async function seed(req, res) {
         quantity: 3,
       },
     ]);
-    res.status(201).send("Database updated");
+
+    // Send success response
+    res.status(201).json({ message: "Products seeded successfully" });
   } catch (err) {
+    // If error occurs, send it to the client
     res.status(400).send(err);
   }
-}
+};
+
 const getProducts = async (req, res) => {
   try {
+    const page = parseInt(req.params.page) || 1;
+    const limit = parseInt(req.params.limit) || 10;
+    const skip = (page - 1) * limit;
+
     console.log("GET request received at /api/product");
-    const products = await product.find();
+    const products = await Product.find().skip(skip).limit(limit);
+    const totalProducts = await Product.countDocuments();
+    console.log(totalProducts);
+    console.log("Fetched products:", products);
+    const totalPages = Math.ceil(totalProducts / limit);
+    console.log(totalPages);
+
     res.status(200).json(products);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -53,7 +71,9 @@ const getProducts = async (req, res) => {
 
 const getProductById = async (req, res) => {
   try {
-    const product = await product.findById(req.params.id);
+    const product = await Product.findById(req.params.id);
+    console.log("Requested ID:", req.params.id);
+
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
