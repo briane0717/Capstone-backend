@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const orderSchema = new mongoose.Schema(
+const ordersSchema = new mongoose.Schema(
   {
     customerInfo: {
       contactDetails: {
@@ -106,6 +106,6 @@ const orderSchema = new mongoose.Schema(
   }
 );
 
-const Order = mongoose.model("Order", orderSchema);
+const Order = mongoose.model("Order", ordersSchema);
 
 export default Order;
