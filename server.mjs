@@ -10,7 +10,7 @@ import connectDB from "./db/conn.mjs";
 import cors from "cors";
 
 // import my routes from their folders
-// import cart from "./routes/cart.mjs";
+import cart from "./routes/cart.mjs";
 // import orders from "./routes/orders.mjs";
 // import user from "./routes/user.mjs";
 import product from "./routes/product.mjs";
