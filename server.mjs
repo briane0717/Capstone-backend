@@ -34,10 +34,10 @@ app.get("/", (req, res) => {
 });
 
 // fill in my endpoint routes - but they will be in their own folders
-// app.use("/api/cart", cart);
+app.use("/api/cart", cart);
 // app.use("/api/orders", orders);
 // console.log("Using routes for /api/product");
-app.use("/api/product", product);
+app.use("/api/products", product);
 // app.use("/api/user", user);
 
 // default, catch-all route
