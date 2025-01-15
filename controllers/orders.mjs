@@ -1,4 +1,5 @@
 import Order from "../models/order.mjs";
+import Product from "../models/product.mjs";
 
 const getOrders = async (req, res) => {
   try {
@@ -92,40 +93,41 @@ const cancelOrder = async (req, res) => {
   try {
     const orderId = req.params.id;
     const { userId, email } = req.query;
-
     const order = await Order.findById(orderId);
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
-
-    // Verify order belongs to user
     if (userId && order.userId != userId) {
       return res
         .status(403)
-        .json({ message: "Not authorized to cancel this order" });
+        .json({ message: "Not authorized to view this order" });
     }
 
     if (email && order.customerInfo.contactDetails.email !== email) {
       return res
         .status(403)
-        .json({ message: "Not authorized to cancel this order" });
+        .json({ message: "Not authorized to view this order" });
+    }
+    if (order.orderStatus === "Shipped" || order.orderStatus === "Delivered") {
+      return res.status(400).json({
+        message: "Cannot cancel order that has been shipped or delivered",
+      });
+    }
+    for (const item of order.order.orderItems) {
+      const product = await Product.findById(item.product);
+      if (product) {
+        product.quantity += item.quantity;
+        await product.save();
+      }
     }
 
-    // Check if order can be cancelled
-    if (order.orderStatus === "Delivered") {
-      return res
-        .status(400)
-        .json({ message: "Cannot cancel an order that has been delivered" });
-    }
-
-    // Update order status to Cancelled
     order.orderStatus = "Cancelled";
+    order.lastUpdated = Date.now();
     await order.save();
-
-    res.status(200).json({ message: "Order has been cancelled" });
+    res.status(200).json({ message: "Order cancelled successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
-export default { getOrders, getOrderById, getOrderStatus };
+export default { getOrders, getOrderById, getOrderStatus, cancelOrder };
