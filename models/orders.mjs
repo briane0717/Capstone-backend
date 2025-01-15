@@ -46,6 +46,7 @@ const ordersSchema = new mongoose.Schema(
     orderItems: [
       {
         product: {
+          // Retrieves the products associated with this order
           type: mongoose.Schema.Types.ObjectId,
           ref: "Product",
           required: true,

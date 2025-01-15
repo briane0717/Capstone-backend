@@ -5,7 +5,7 @@ const cartSchema = new mongoose.Schema(
     // Store the user id when the cart is created for authenticated users
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      // if you have a User model
+      // when user model gets created, we will reference it here
       ref: "User",
       // Optional for now as it's not mandatory for guests
       required: false,
