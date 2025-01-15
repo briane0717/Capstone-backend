@@ -7,6 +7,8 @@ router.get("/", ordersController.getOrders);
 // Gets an order by its id
 router.get("/:id", ordersController.getOrderById);
 //Check order status
-router.get("/status/:id", ordersController.getOrderStatus);
+router.get("/:id/status", ordersController.getOrderStatus);
 //Cancel order
-router.put("/cancel/:id", ordersController.cancelOrder);
+router.put("/:id/cancel", ordersController.cancelOrder);
+
+export default router;

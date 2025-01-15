@@ -29,15 +29,15 @@ const getProductById = async (req, res) => {
   }
 };
 
-const createProduct = async (req, res) => {
-  try {
-    console.log(req.body);
-    const product = new Product(req.body);
-    const savedProduct = await product.save();
-    res.status(201).json(savedProduct);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
+// const createProduct = async (req, res) => {
+//   try {
+//     console.log(req.body);
+//     const product = new Product(req.body);
+//     const savedProduct = await product.save();
+//     res.status(201).json(savedProduct);
+//   } catch (error) {
+//     res.status(400).json({ message: error.message });
+//   }
+// };
 
-export default { getProducts, getProductById, createProduct };
+export default { getProducts, getProductById };
