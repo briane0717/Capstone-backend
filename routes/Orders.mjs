@@ -10,5 +10,7 @@ router.get("/:id", ordersController.getOrderById);
 router.get("/:id/status", ordersController.getOrderStatus);
 //Cancel order
 router.put("/:id/cancel", ordersController.cancelOrder);
+// Create order. Will be moved later
+router.post("/", ordersController.createOrder);
 
 export default router;
