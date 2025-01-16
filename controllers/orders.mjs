@@ -219,7 +219,8 @@ const createOrder = async (req, res) => {
 
     // Create new order
     const newOrder = new Orders({
-      userId: userId || null, // Allow null for guest orders
+      // Allow null for guest orders
+      userId: userId || null,
       customerInfo,
       orderItems,
       paymentInfo: {
