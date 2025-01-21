@@ -30,11 +30,11 @@ const productSchema = new mongoose.Schema(
       },
       required: false,
     },
-    stockStatus: {
-      // True for in-stock, false for out-of-stock
-      type: Boolean,
+    quantity: {
+      type: Number,
       required: true,
-      default: true,
+      min: 0,
+      default: 0,
     },
     category: {
       // Optional category field, will be created in the future

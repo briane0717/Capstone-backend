@@ -1,6 +1,13 @@
 import Cart from "../models/cart.mjs";
 import Product from "../models/product.mjs";
 
+// Function to calculate the total price of all items in the cart
+const calculateTotalPrice = (items) => {
+  return items
+    .reduce((total, item) => total + item.price * item.quantity, 0) // Sum price * quantity for each item
+    .toFixed(2); // Return total price rounded to 2 decimal places
+};
+
 const getCart = async (req, res) => {
   try {
     const cart = await Cart.findOne().populate("items.productId");
@@ -44,11 +51,8 @@ const addToCart = async (req, res) => {
         cart.items.push({ productId, quantity, price: product.price });
       }
 
-      // Recalculate total
-      cart.totalPrice = cart.items.reduce(
-        (total, item) => total + item.price * item.quantity,
-        0
-      );
+      // Recalculate total using the calculateTotalPrice function
+      cart.totalPrice = calculateTotalPrice(cart.items);
     }
 
     await cart.save();
@@ -86,10 +90,8 @@ const updateCart = async (req, res) => {
       cart.items[itemIndex].quantity = quantity;
     }
 
-    cart.totalPrice = cart.items.reduce(
-      (total, item) => total + item.price * item.quantity,
-      0
-    );
+    // Recalculate total using the calculateTotalPrice function
+    cart.totalPrice = calculateTotalPrice(cart.items);
 
     await cart.save();
     const updatedCart = await cart.populate("items.productId");
@@ -98,6 +100,7 @@ const updateCart = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 const removeFromCart = async (req, res) => {
   const { productId } = req.params;
 
@@ -115,10 +118,8 @@ const removeFromCart = async (req, res) => {
     }
 
     cart.items.splice(itemIndex, 1);
-    cart.totalPrice = cart.items.reduce(
-      (total, item) => total + item.price * item.quantity,
-      0
-    );
+    // Recalculate total using calculateTotalPrice function
+    cart.totalPrice = calculateTotalPrice(cart.items);
 
     await cart.save();
     const updatedCart = await cart.populate("items.productId");

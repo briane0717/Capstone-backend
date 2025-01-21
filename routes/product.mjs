@@ -7,6 +7,10 @@ router.get("/", productController.getProducts);
 //Gets a product by its id
 router.get("/:id", productController.getProductById);
 //Creates a product
-// router.post("/", productController.createProduct);
+router.post("/", productController.createProduct);
+
+router.delete("/:id", productController.deleteProduct);
+
+router.put("/:id", productController.updateProduct);
 
 export default router;
