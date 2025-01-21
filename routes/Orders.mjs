@@ -13,4 +13,7 @@ router.put("/:id/cancel", ordersController.cancelOrder);
 // Create order. Will be moved later
 router.post("/", ordersController.createOrder);
 
+//Delete order
+router.delete("/:id", ordersController.deleteOrder);
+
 export default router;
