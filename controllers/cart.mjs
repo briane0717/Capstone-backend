@@ -1,19 +1,24 @@
 import Cart from "../models/cart.mjs";
 import Product from "../models/product.mjs";
 
-// Function to calculate the total price of all items in the cart
-const calculateTotalPrice = (items) => {
-  return items
-    .reduce((total, item) => total + item.price * item.quantity, 0) // Sum price * quantity for each item
-    .toFixed(2); // Return total price rounded to 2 decimal places
-};
-
 const getCart = async (req, res) => {
   try {
-    const cart = await Cart.findOne().populate("items.productId");
+    let cart = await Cart.findOne().populate("items.productId");
+
     if (!cart) {
       return res.status(200).json({ items: [], totalPrice: 0 });
     }
+
+    // Remove items with null productId (deleted products)
+    cart.items = cart.items.filter((item) => item.productId);
+
+    // Recalculate total price
+    cart.totalPrice = cart.items.reduce(
+      (total, item) => total + item.price * item.quantity,
+      0
+    );
+
+    await cart.save();
     res.status(200).json(cart);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -28,7 +33,6 @@ const addToCart = async (req, res) => {
   }
 
   try {
-    // Get product to check availability and price
     const product = await Product.findById(productId);
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
@@ -42,7 +46,7 @@ const addToCart = async (req, res) => {
       });
     } else {
       const itemIndex = cart.items.findIndex(
-        (item) => item.productId.toString() === productId
+        (item) => item.productId?.toString() === productId
       );
 
       if (itemIndex > -1) {
@@ -51,8 +55,12 @@ const addToCart = async (req, res) => {
         cart.items.push({ productId, quantity, price: product.price });
       }
 
-      // Recalculate total using the calculateTotalPrice function
-      cart.totalPrice = calculateTotalPrice(cart.items);
+      // Recalculate total after filtering null products
+      cart.items = cart.items.filter((item) => item.productId);
+      cart.totalPrice = cart.items.reduce(
+        (total, item) => total + item.price * item.quantity,
+        0
+      );
     }
 
     await cart.save();
@@ -71,13 +79,16 @@ const updateCart = async (req, res) => {
   }
 
   try {
-    const cart = await Cart.findOne();
+    let cart = await Cart.findOne();
     if (!cart) {
       return res.status(404).json({ message: "Cart not found" });
     }
 
+    // Remove items with null productId first
+    cart.items = cart.items.filter((item) => item.productId);
+
     const itemIndex = cart.items.findIndex(
-      (item) => item.productId.toString() === productId
+      (item) => item.productId?.toString() === productId
     );
 
     if (itemIndex === -1) {
@@ -90,8 +101,10 @@ const updateCart = async (req, res) => {
       cart.items[itemIndex].quantity = quantity;
     }
 
-    // Recalculate total using the calculateTotalPrice function
-    cart.totalPrice = calculateTotalPrice(cart.items);
+    cart.totalPrice = cart.items.reduce(
+      (total, item) => total + item.price * item.quantity,
+      0
+    );
 
     await cart.save();
     const updatedCart = await cart.populate("items.productId");
@@ -105,21 +118,27 @@ const removeFromCart = async (req, res) => {
   const { productId } = req.params;
 
   try {
-    const cart = await Cart.findOne();
+    let cart = await Cart.findOne();
     if (!cart) {
       return res.status(404).json({ message: "Cart not found" });
     }
 
+    // Remove items with null productId first
+    cart.items = cart.items.filter((item) => item.productId);
+
     const itemIndex = cart.items.findIndex(
-      (item) => item.productId.toString() === productId
+      (item) => item.productId?.toString() === productId
     );
+
     if (itemIndex === -1) {
       return res.status(404).json({ message: "Item not found in cart" });
     }
 
     cart.items.splice(itemIndex, 1);
-    // Recalculate total using calculateTotalPrice function
-    cart.totalPrice = calculateTotalPrice(cart.items);
+    cart.totalPrice = cart.items.reduce(
+      (total, item) => total + item.price * item.quantity,
+      0
+    );
 
     await cart.save();
     const updatedCart = await cart.populate("items.productId");
@@ -130,15 +149,12 @@ const removeFromCart = async (req, res) => {
 };
 
 const clearCart = async (req, res) => {
-  const { userId } = req.body;
-
   try {
-    const cart = await Cart.findOne({ userId });
+    let cart = await Cart.findOne();
     if (!cart) {
       return res.status(404).json({ message: "Cart not found" });
     }
 
-    // Clear the cart
     cart.items = [];
     cart.totalPrice = 0;
 
