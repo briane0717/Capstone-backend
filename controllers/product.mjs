@@ -5,13 +5,34 @@ const getProducts = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
+    const { category, minPrice, maxPrice, sort } = req.query;
 
-    const products = await Product.find();
-    //.skip(skip).limit(limit)
-    const totalProducts = await Product.countDocuments();
+    let query = {};
+    if (category) query.category = category;
+    if (minPrice || maxPrice) {
+      query.price = {};
+      if (minPrice) query.price.$gte = parseFloat(minPrice);
+      if (maxPrice) query.price.$lte = parseFloat(maxPrice);
+    }
+
+    let sortOption = {};
+    if (sort === "price_asc") sortOption.price = 1;
+    if (sort === "price_desc") sortOption.price = -1;
+
+    const products = await Product.find(query)
+      .sort(sortOption)
+      .skip(skip)
+      .limit(limit);
+
+    const totalProducts = await Product.countDocuments(query);
     const totalPages = Math.ceil(totalProducts / limit);
 
-    res.status(200).json(products);
+    res.status(200).json({
+      products,
+      currentPage: page,
+      totalPages,
+      totalProducts,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -31,7 +52,6 @@ const getProductById = async (req, res) => {
 
 const createProduct = async (req, res) => {
   try {
-    // console.log(req.body);
     const product = new Product(req.body);
     const savedProduct = await product.save();
     res.status(201).json(savedProduct);
@@ -57,7 +77,6 @@ const updateProduct = async (req, res) => {
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
       req.body,
-      // Options: return the updated document & validate input
       { new: true, runValidators: true }
     );
 
