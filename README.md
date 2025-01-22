@@ -1,76 +1,105 @@
-E-Commerce Backend
+# E-Commerce Backend
+
 Node.js/Express backend for an e-commerce platform with MongoDB database.
-Features
 
-RESTful API
-Product management
-Cart operations
-Order processing
-MongoDB integration
+## Features
 
-Tech Stack
+- RESTful API
+- Product management
+- Cart operations
+- Order processing
+- MongoDB integration
 
-Node.js
-Express.js
-MongoDB
-Mongoose
+## Tech Stack
 
-Route Structure
-Product Routes
-javascriptCopyrouter.get("/", productController.getProducts); // Gets all products
+- Node.js
+- Express.js
+- MongoDB
+- Mongoose
+
+## Route Structure
+
+### Product Routes
+
+```javascript
+router.get("/", productController.getProducts); // Gets all products
 router.get("/:id", productController.getProductById); // Gets a product by its id
 router.post("/", productController.createProduct); // Creates a product
 router.delete("/:id", productController.deleteProduct); // Deletes a product
 router.put("/:id", productController.updateProduct); // Updates a product
-Cart Routes
-javascriptCopyrouter.get("/", cartController.getCart); // Gets cart
+```
+
+### Cart Routes
+
+```javascript
+router.get("/", cartController.getCart); // Gets cart
 router.post("/add", cartController.addToCart); // Adds to cart
 router.put("/update/:productId", cartController.updateCart); // Updates cart
 router.delete("/remove/:productId", cartController.removeFromCart); // Removes from cart
 router.delete("/clear", cartController.clearCart); // Clears cart
-Order Routes
-javascriptCopyrouter.get("/", ordersController.getOrders); // Gets all orders
+```
+
+### Order Routes
+
+```javascript
+router.get("/", ordersController.getOrders); // Gets all orders
 router.get("/:id", ordersController.getOrderById); // Gets order by id
 router.get("/:id/status", ordersController.getOrderStatus); // Checks order status
 router.put("/:id/cancel", ordersController.cancelOrder); // Cancels order
 router.post("/", ordersController.createOrder); // Creates order
 router.delete("/:id", ordersController.deleteOrder); // Deletes order
-Installation
+```
 
-Clone the repository
+## Installation
 
-bashCopygit clone [backend-repo-url]
+1. Clone the repository
+
+```bash
+git clone [backend-repo-url]
 cd backend
+```
 
-Install dependencies
+2. Install dependencies
 
-bashCopynpm install
+```bash
+npm install
+```
 
-Environment Setup
-Create .env:
+3. Environment Setup
 
-CopyMONGODB_URI=your_mongodb_connection_string
+Create `.env`:
+
+```
+MONGODB_URI=your_mongodb_connection_string
 PORT=5050
 CORS_ORIGIN=http://localhost:3000
+```
 
-Start Server
+4. Start Server
 
-bashCopynpm start
-Project Structure
-Copy├── controllers/
+```bash
+npm start
+```
+
+## Project Structure
+
+```
+├── controllers/
 ├── models/
 ├── routes/
 └── server.js
-Database Models
+```
 
-Products: Product information and inventory
-Cart: Shopping cart data
-Orders: Order processing and tracking
+## Database Models
 
-Future Enhancements
+- Products: Product information and inventory
+- Cart: Shopping cart data
+- Orders: Order processing and tracking
 
-User authentication
-Payment processing
-Advanced search
-Analytics
-Admin dashboard
+## Future Enhancements
+
+- User authentication
+- Payment processing
+- Advanced search
+- Analytics
+- Admin dashboard
