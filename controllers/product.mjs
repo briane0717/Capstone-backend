@@ -1,12 +1,11 @@
 import Product from "../models/product.mjs";
 
-// In controllers/product.mjs
 const getProducts = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
-    const { category, minPrice, maxPrice, sort, search } = req.query;
+    const { category, minPrice, maxPrice, sort } = req.query;
 
     let query = {};
     if (category) query.category = category;
@@ -14,15 +13,6 @@ const getProducts = async (req, res) => {
       query.price = {};
       if (minPrice) query.price.$gte = parseFloat(minPrice);
       if (maxPrice) query.price.$lte = parseFloat(maxPrice);
-    }
-
-    // Add search functionality
-    if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
-        { category: { $regex: search, $options: "i" } },
-      ];
     }
 
     let sortOption = {};
@@ -62,7 +52,18 @@ const getProductById = async (req, res) => {
 
 const createProduct = async (req, res) => {
   try {
-    const product = new Product(req.body);
+    const imagePaths = req.files
+      ? req.files.map((file) => `/uploads/${file.filename}`)
+      : [];
+
+    const productData = {
+      ...req.body,
+      images: imagePaths,
+      price: Number(req.body.price),
+      quantity: Number(req.body.quantity),
+    };
+
+    const product = new Product(productData);
     const savedProduct = await product.save();
     res.status(201).json(savedProduct);
   } catch (error) {

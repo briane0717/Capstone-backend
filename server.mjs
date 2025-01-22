@@ -1,6 +1,8 @@
 import express from "express";
 import dotenv from "dotenv";
 import logger from "morgan";
+import path from "path";
+import { fileURLToPath } from "url";
 
 dotenv.config();
 
@@ -15,11 +17,15 @@ import orders from "./routes/orders.mjs";
 // import user from "./routes/user.mjs";
 import product from "./routes/product.mjs";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 // set up port
 const PORT = process.env.PORT || 5050;
 
 //create app
 const app = express();
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // middleware
 app.use(cors());
