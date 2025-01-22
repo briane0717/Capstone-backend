@@ -106,5 +106,8 @@ const ordersSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+ordersSchema.index({ "customerInfo.contactDetails.email": 1 });
+ordersSchema.index({ orderStatus: 1 });
+ordersSchema.index({ createdAt: -1 });
 
 export default mongoose.model("Orders", ordersSchema);

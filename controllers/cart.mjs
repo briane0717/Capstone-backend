@@ -123,11 +123,8 @@ const removeFromCart = async (req, res) => {
       return res.status(404).json({ message: "Cart not found" });
     }
 
-    // Remove items with null productId first
-    cart.items = cart.items.filter((item) => item.productId);
-
     const itemIndex = cart.items.findIndex(
-      (item) => item.productId?.toString() === productId
+      (item) => item.productId?._id?.toString() === productId
     );
 
     if (itemIndex === -1) {
@@ -144,10 +141,22 @@ const removeFromCart = async (req, res) => {
     const updatedCart = await cart.populate("items.productId");
     res.status(200).json(updatedCart);
   } catch (error) {
+    console.error("Error removing item:", error);
     res.status(500).json({ message: error.message });
   }
 };
-
+const handleRemoveItem = async (productId) => {
+  try {
+    const response = await axios.delete(
+      `http://localhost:5050/api/cart/remove/${productId}`
+    );
+    setCart(response.data);
+    setError(null);
+  } catch (err) {
+    console.error("Error details:", err.response?.data);
+    setError("Failed to remove item");
+  }
+};
 const clearCart = async (req, res) => {
   try {
     let cart = await Cart.findOne();
