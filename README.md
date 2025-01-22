@@ -72,7 +72,7 @@ Create `.env`:
 ```
 MONGODB_URI=your_mongodb_connection_string
 PORT=5050
-CORS_ORIGIN=http://localhost:3000
+
 ```
 
 4. Start Server
