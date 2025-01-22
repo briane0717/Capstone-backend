@@ -3,18 +3,18 @@ import Product from "../models/product.mjs";
 
 const getOrders = async (req, res) => {
   try {
-    const { userId, email } = req.query;
+    const { orderId, email } = req.query;
 
-    let orders;
-    if (userId) {
-      orders = await Orders.find({ userId });
-    } else if (email) {
-      orders = await Orders.find({
-        "customerInfo.contactDetails.email": email,
-      });
-    } else {
-      return res.status(400).json({ message: "User ID or email is required" });
+    if (!orderId || !email) {
+      return res
+        .status(400)
+        .json({ message: "Both order ID and email are required" });
     }
+
+    const orders = await Orders.find({
+      _id: orderId,
+      "customerInfo.contactDetails.email": email,
+    });
 
     res.status(200).json(orders);
   } catch (error) {
@@ -25,24 +25,19 @@ const getOrders = async (req, res) => {
 const getOrderById = async (req, res) => {
   try {
     const orderId = req.params.id;
-    const { userId, email } = req.query;
+    const { email } = req.query;
 
-    const order = await Orders.findById(orderId);
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    const order = await Orders.findOne({
+      _id: orderId,
+      "customerInfo.contactDetails.email": email,
+    });
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
-    }
-
-    if (userId && order.userId != userId) {
-      return res
-        .status(403)
-        .json({ message: "Not authorized to view this order" });
-    }
-
-    if (email && order.customerInfo.contactDetails.email !== email) {
-      return res
-        .status(403)
-        .json({ message: "Not authorized to view this order" });
     }
 
     res.status(200).json(order);
@@ -54,24 +49,19 @@ const getOrderById = async (req, res) => {
 const getOrderStatus = async (req, res) => {
   try {
     const orderId = req.params.id;
-    const { userId, email } = req.query;
+    const { email } = req.query;
 
-    const order = await Orders.findById(orderId);
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    const order = await Orders.findOne({
+      _id: orderId,
+      "customerInfo.contactDetails.email": email,
+    });
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
-    }
-
-    if (userId && order.userId != userId) {
-      return res
-        .status(403)
-        .json({ message: "Not authorized to view this order" });
-    }
-
-    if (email && order.customerInfo.contactDetails.email !== email) {
-      return res
-        .status(403)
-        .json({ message: "Not authorized to view this order" });
     }
 
     res.status(200).json({
@@ -87,28 +77,27 @@ const getOrderStatus = async (req, res) => {
 const cancelOrder = async (req, res) => {
   try {
     const orderId = req.params.id;
-    const { userId, email } = req.query;
-    const order = await Orders.findById(orderId);
+    const { email } = req.query;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    const order = await Orders.findOne({
+      _id: orderId,
+      "customerInfo.contactDetails.email": email,
+    });
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
-    if (userId && order.userId != userId) {
-      return res
-        .status(403)
-        .json({ message: "Not authorized to view this order" });
-    }
 
-    if (email && order.customerInfo.contactDetails.email !== email) {
-      return res
-        .status(403)
-        .json({ message: "Not authorized to view this order" });
-    }
     if (order.orderStatus === "Shipped" || order.orderStatus === "Delivered") {
       return res.status(400).json({
         message: "Cannot cancel order that has been shipped or delivered",
       });
     }
+
     for (const item of order.orderItems) {
       const product = await Product.findById(item.product);
       if (product) {

@@ -38,6 +38,14 @@ const addToCart = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
+    // Stock validation checks
+    if (product.quantity === 0) {
+      return res.status(400).json({
+        message: "Product is out of stock",
+        availableQuantity: 0,
+      });
+    }
+
     let cart = await Cart.findOne();
     if (!cart) {
       cart = new Cart({
@@ -48,6 +56,18 @@ const addToCart = async (req, res) => {
       const itemIndex = cart.items.findIndex(
         (item) => item.productId?.toString() === productId
       );
+
+      // Check total quantity including existing cart items
+      const totalQuantityInCart =
+        itemIndex > -1 ? cart.items[itemIndex].quantity + quantity : quantity;
+
+      // Validate against available product stock
+      if (totalQuantityInCart > product.quantity) {
+        return res.status(400).json({
+          message: "Requested quantity exceeds available stock",
+          availableQuantity: product.quantity,
+        });
+      }
 
       if (itemIndex > -1) {
         cart.items[itemIndex].quantity += quantity;
@@ -145,18 +165,7 @@ const removeFromCart = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-const handleRemoveItem = async (productId) => {
-  try {
-    const response = await axios.delete(
-      `http://localhost:5050/api/cart/remove/${productId}`
-    );
-    setCart(response.data);
-    setError(null);
-  } catch (err) {
-    console.error("Error details:", err.response?.data);
-    setError("Failed to remove item");
-  }
-};
+
 const clearCart = async (req, res) => {
   try {
     let cart = await Cart.findOne();
